@@ -30,7 +30,8 @@ class APObjectAdmin(admin.ModelAdmin):
 
 class braceletAdmin(admin.ModelAdmin):
     readonly_fields = ['pk_id']
-    fields=('pk_id','type','macAddress','data','profile')
+    fields=('pk_id','type','macAddress','data','profile','status')
+    list_display=('pk_id','type','macAddress','profile','status')
 
 
     def formfield_for_dbfield(self, db_field, **kwargs):

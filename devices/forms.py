@@ -8,6 +8,7 @@ def is_json(myjson):
     try:
         json.loads(myjson)
     except ValueError:
+        logger.debug('this is not json---{0}'.format(myjson))
         return False
     return True
 
@@ -51,6 +52,7 @@ class ObjectMixedField(forms.CharField,forms.IntegerField):
         obj={}
         if is_json(value):
             obj=json.loads(value)
+            logger.debug('DEBUG:to_python-----{0}'.format(obj))
             #del obj['update_by']
             #del obj['update_on']
         else:
