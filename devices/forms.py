@@ -8,6 +8,7 @@ def is_json(myjson):
     try:
         json.loads(myjson)
     except ValueError:
+        logger.debug('this is not json---{0}'.format(myjson))
         return False
     return True
 
@@ -35,7 +36,7 @@ class ObjectMixedField(forms.CharField,forms.IntegerField):
     def prepare_value(self,value):
         if not value:
             return ''
-
+        logger.debug('prepare_value-----{0}---{1}'.format(self,value))
         newvalue = {}
 
         for key, val in value.__dict__.items():
@@ -45,12 +46,15 @@ class ObjectMixedField(forms.CharField,forms.IntegerField):
                 newvalue[key] = str(val)
         return json.dumps(newvalue,indent=4)
 
+
+
     def to_python(self,value):
         if not value:
             return {}
         obj={}
         if is_json(value):
             obj=json.loads(value)
+            logger.debug('DEBUG:to_python-----{0}'.format(obj))
             #del obj['update_by']
             #del obj['update_on']
         else:
