@@ -47,13 +47,14 @@ class gps(models.Model):
 class patientProfile(models.Model):
     name=models.CharField(max_length=10)
     genderChoice=(
-        (0,u'Male'),
-        (1,u'Female'),
+        (1,u'Male'),
+        (0,u'Female'),
+        (-1,u'None'),
     )
-    gender=models.IntegerField(choices=genderChoice)
+    gender=models.IntegerField(choices=genderChoice,default=-1)
     remark=models.CharField(max_length=100,blank=True)
     def __unicode__(self):
-        if isinstance(self,patientProfile):
+        if self.gender in (0,1):
             #logger.debug("%s---%s" % (self,isinstance(self,patientProfile)))
             return "%s--%s" % (self.name,self.genderChoice[self.gender][1])
         else:
@@ -70,24 +71,26 @@ class APObject(models.Model):
     APStatus=(
         (0,u'working'),
         (1,u'not working'),
-
     )
     status=models.IntegerField(choices=APStatus)
-    gps = EmbedOverrideFloatField('gps')
+    #gps = EmbedOverrideFloatField('gps')
+    longitude=models.FloatField(blank=True)
+    latitude=models.FloatField(blank=True)
     create_on = models.DateTimeField('create_on')
     update_by = ObjectIdField(max_length=50,db_column='update_by',verbose_name='update by')
     update_on = models.DateTimeField('update_on')
+
     class Meta:
         db_table='AP'
+
+
 
     def save(self):
         current={
             "name":self.deviceName,
             "status":self.status,
-            "gps":{
-                "longitude": self.gps.longitude,
-                "latitude": self.gps.latitude,
-            },
+            "longitude":self.longitude,
+            "latitude":self.latitude,
         }
         AP=db.AP
         pre = AP.find_one({'_id': ObjectId(self.pk)})
@@ -97,7 +100,6 @@ class APObject(models.Model):
             current['update_on']=now
             current['update_by']=self.update_by
             #status
-
 
             pre_id = AP.insert_one(current).inserted_id
             # if not exist, insert and print id here, if true then success
@@ -116,12 +118,27 @@ class APObject(models.Model):
 
 class bracelet(models.Model):
     pk_id = ObjectIdField(max_length=50, db_column='id', verbose_name='Object ID', blank=True)
-    #deviceName=models.CharField(max_length=20,db_column='name',verbose_name='Device name')
+    #deviceName=models.CharField(max_length=20,db_column='name',verbose_name='Device name'
+    #  )
+    # TOdo:serial Id field
+    deviceName=models.CharField(max_length=10)
     type=models.CharField(max_length=2,default='01')
     macAddress=models.CharField(max_length=17)
     data=models.CharField(max_length=72,blank=True)
     #patientProfile=
-    profile=EmbedOverrideMixedField('patientProfile',blank=True)
+    #profile=EmbedOverrideMixedField('patientProfile',blank=True)
+
+    genderChoice=(
+        (0,u'Male'),
+        (1,u'Female'),
+        (-1,u'Other'),
+    )
+
+
+    patientName=models.CharField(max_length=20,blank=True)
+    patientGender=models.IntegerField(choices=genderChoice,blank=True)
+    patientRemark=models.CharField(max_length=100,blank=True)
+    patientPhone=models.CharField(max_length=20,blank=True)
 
     BStatus=(
         (0,u'not registered'),
@@ -136,32 +153,47 @@ class bracelet(models.Model):
 
     class Meta:
         db_table='bracelet'
+    def showPatientProfile(self):
+        if self.patientName != '' and self.patientGender is not None:
+            return "%s/%s/%s" %  (self.patientName,self.genderChoice[self.patientGender][1],self.patientPhone)
+    showPatientProfile.short_description='PatientProfile'
 
     def save(self):
         logger.debug('DEBUG:---self.status---{0}'.format(self.status))
         current={
             "type":self.type,
             "macAddress":self.macAddress,
+            "deviceName":self.deviceName,
             "data":self.data,
             "status":self.status,
+            "patientName":self.patientName,
+            "patientGender":self.patientGender,
+            "patientRemark":self.patientRemark,
+            "patientPhone":self.patientPhone,
         }
         bracelet=db.bracelet
-        pre = bracelet.find_one({'_id': ObjectId(self.pk)})
+        pre = bracelet.find_one({'_id': ObjectId(self.pk)})#
+        #if self.status==0 and (self.patientName!= '' or self.patientGender!='' or self.patientPhone!='' or self.patientRemark1!=''):
+        #    current['patientName']=''
+        #    current['patientPhone']=''
+        #    current['patientGender']=''
+        #    current['patientRemark']=''
+#
+        #if self.patientName !='' and self.status !=1:
+        #    current["status"]=1
+
+
         if pre == None:
             now = datetime.datetime.now()
             current['create_on']=now
             current['update_on']=now
             current['update_by']=self.update_by
             #logger.debug('self.profile---{0}----{1}'.format(self.profile,type(self.profile)))
-            if self.profile is not None:
-                current['profile']={
-                    "name": self.profile.name,
-                    "gender": self.profile.gender,
-                    "remark":self.profile.remark,
-                    }
-                #current['status']=0
 
-            logger.debug('DEBUG:---current[status]---{0}'.format(current['status']))
+
+            #current['status']=0
+
+            #logger.debug('DEBUG:---current[profile]---{0}'.format(current['profile']))
             #status
 
             pre_id = bracelet.insert_one(current).inserted_id
