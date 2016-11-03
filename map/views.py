@@ -24,9 +24,8 @@ def get_org(request,org_id=''):
     data =[]
     result={}
 
-
-
     if org_id == '':
+        #get org list
         showValue = ['title', 'address', 'floors', 'longitude', 'latitude']
         showValueDict = {}
         for i in showValue:
@@ -36,28 +35,31 @@ def get_org(request,org_id=''):
             out['_id']=o_id
             data.append(out)
     else:
-        #Todo,also need to add drawable below
-        showValuePart = ['title', 'floor', 'floors']
-        showValuePartDict = {}
-        for i in showValuePart:
-            showValuePartDict[i] = 1
-        logger.debug(org_id)
-        for outComePart in db.part.find({'owner':ObjectId(org_id)},showValuePartDict):
-            #logger.debug(outComePart)
-            outComePart['drawables']=[]
-            showValueDrawable=['title','type','longitude','latitude','data']
-            showValueDrawableDict={}
-            for i in showValueDrawable:
-                showValueDrawableDict[i]=1
-            for outComeDrawble in db.drawable.find({'part':ObjectId(outComePart['_id'])},showValueDrawableDict):
-                o_id=outComeDrawble['_id'].__str__()
-                outComeDrawble['_id']=o_id
-                outComePart['drawables'].append(outComeDrawble)
+        #check if objectid valid
+        if not ObjectId.is_valid (org_id) :
+            return HttpResponse(json.dumps({'status':'Failed','Info':'Wrong para.Plz check whether it\'s valid Id'},indent=4),content_type="application/json")
+        else:
+            showValuePart = ['title', 'floor', 'floors']
+            showValuePartDict = {}
+            for i in showValuePart:
+                showValuePartDict[i] = 1
+            logger.debug(org_id)
+            for outComePart in db.part.find({'owner':ObjectId(org_id)},showValuePartDict):
+                #logger.debug(outComePart)
+                outComePart['drawables']=[]
+                showValueDrawable=['title','type','longitude','latitude','data']
+                showValueDrawableDict={}
+                for i in showValueDrawable:
+                    showValueDrawableDict[i]=1
+                for outComeDrawble in db.drawable.find({'part':ObjectId(outComePart['_id'])},showValueDrawableDict):
+                    o_id=outComeDrawble['_id'].__str__()
+                    outComeDrawble['_id']=o_id
+                    outComePart['drawables'].append(outComeDrawble)
 
-            o_id=outComePart['_id'].__str__()
-            outComePart['_id']=o_id
-            data.append(outComePart)
-            logger.debug(data)
+                o_id=outComePart['_id'].__str__()
+                outComePart['_id']=o_id
+                data.append(outComePart)
+                #logger.debug(data)
 
     result['status']='ok'
     result['data']=data
@@ -66,6 +68,11 @@ def get_org(request,org_id=''):
 
 @csrf_exempt
 def post_drawing(request,part_id):
+    #part_id invalid, part_id not exist
+    if not ObjectId.is_valid(part_id):
+        return HttpResponse(json.dumps({'status':'Failed','Info':'Wrong para.Plz check whether it\'s valid Id'},indent=4),content_type="application/json")
+    if db.part.find({'_id':part_id}).count() ==0:
+        return HttpResponse(json.dumps({'status':'Failed','Info':'Part Id {0} not exists. plz check again'.format(part_id)},indent=4),content_type="application/json")
     body={}
     re={}
     re['obj_id']=[]
