@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+    <!-- <meta charset="UTF-8"> -->
+    <head> <meta http-equiv="Content-Type" content="text/html; charset=gb2312"> </head>
+    <title>Title</title>
+</head>
+<body>
+{% for k,v in context.items %}
+    {% if k == 'objects'  %}
+        <p>[</p>
+        {% for i in v %}
+        <p>{</p>
+            <span style="text-indent:2em;">
+            {% for m,n in i.items %}
+                <p>{{m}} : {{n}},</p>
+            {% endfor %}
+            </span>
+        <p>}</p>
+        {% endfor %}
+        <p>]</p>
+    {% else %}
+        <p>{{k}} :  {{v}}</p>
+    {% endif %}
+{% endfor %}
+</body>
+</html>

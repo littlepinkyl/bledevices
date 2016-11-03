@@ -15,7 +15,8 @@ from django.contrib.admin import SimpleListFilter
 from django.utils.translation import ugettext_lazy as _
 
 
-from .models import APObject,bracelet
+from .models import APObject,Bracelet
+#from map.models import Organization
 
 class APObjectAdmin(admin.ModelAdmin):
     readonly_fields=['pk_id','create_on','update_by','update_on','showMap']
@@ -46,8 +47,8 @@ class APObjectAdmin(admin.ModelAdmin):
     #search objectid, deviceName
 
 
-class braceletAdmin(admin.ModelAdmin):
-    readonly_fields = ['pk_id','create_on','update_by','update_on']
+class BraceletAdmin(admin.ModelAdmin):
+    readonly_fields = ['pk_id','create_on','update_by','update_on','patientName','patientGender','patientPhone','patientRemark']
     #Todo:support to search objectId,paitent profile,device name
     #search_fields=['macAddress']
     #Todo:add list_filter with status, type,
@@ -62,7 +63,7 @@ class braceletAdmin(admin.ModelAdmin):
     #search_fields=['deviceName','type','macAddress','patientName','patientPhone']
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        formfield = super(braceletAdmin, self).formfield_for_dbfield(db_field, **kwargs)
+        formfield = super(BraceletAdmin, self).formfield_for_dbfield(db_field, **kwargs)
         if db_field.name in ['data','profile' ]:
             formfield.widget = forms.Textarea(attrs=formfield.widget.attrs)
         return formfield
@@ -126,4 +127,4 @@ class braceletAdmin(admin.ModelAdmin):
         return qs.filter(pk__in=result_list)
 # Register your models here.
 admin.site.register(APObject,APObjectAdmin)
-admin.site.register(bracelet,braceletAdmin)
+admin.site.register(Bracelet,BraceletAdmin)

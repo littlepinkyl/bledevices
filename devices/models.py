@@ -62,9 +62,6 @@ class patientProfile(models.Model):
 
 
 
-
-
-
 class APObject(models.Model):
     pk_id=ObjectIdField(max_length=50,db_column='id',verbose_name='Object ID')
     deviceName=models.CharField(max_length=20,db_column='name',verbose_name='Device name')
@@ -116,7 +113,7 @@ class APObject(models.Model):
                 pass
 
 
-class bracelet(models.Model):
+class Bracelet(models.Model):
     pk_id = ObjectIdField(max_length=50, db_column='id', verbose_name='Object ID', blank=True)
     #deviceName=models.CharField(max_length=20,db_column='name',verbose_name='Device name'
     #  )
@@ -137,7 +134,7 @@ class bracelet(models.Model):
 
     patientName=models.CharField(max_length=20,blank=True)
     patientGender=models.IntegerField(choices=genderChoice,blank=True)
-    patientRemark=models.CharField(max_length=100,blank=True)
+    patientRemark=models.TextField(blank=True)
     patientPhone=models.CharField(max_length=20,blank=True)
 
     BStatus=(
@@ -209,3 +206,4 @@ class bracelet(models.Model):
             if res == 1:
                 #print '[DEBUG]:save successfully!'
                 pass
+
