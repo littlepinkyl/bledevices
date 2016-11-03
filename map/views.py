@@ -71,8 +71,9 @@ def post_drawing(request,part_id):
     #part_id invalid, part_id not exist
     if not ObjectId.is_valid(part_id):
         return HttpResponse(json.dumps({'status':'Failed','Info':'Wrong para.Plz check whether it\'s valid Id'},indent=4),content_type="application/json")
-    if db.part.find({'_id':part_id}).count() ==0:
+    if db.part.find({'_id':ObjectId(part_id)}).count() == 0:
         return HttpResponse(json.dumps({'status':'Failed','Info':'Part Id {0} not exists. plz check again'.format(part_id)},indent=4),content_type="application/json")
+
     body={}
     re={}
     re['obj_id']=[]
@@ -81,7 +82,12 @@ def post_drawing(request,part_id):
 
     except Exception,e:
         logger.debug('[1]---{0}---{1}---{2}'.format(Exception,e,request.body))
+        return HttpResponse(json.dumps({'status':'Failed','Info':'Request body is not valid json. plz check again','Data':request.body},indent=4),content_type="application/json")
 
+    if 'part' not in body.keys() :
+        return HttpResponse(json.dumps({'status':'Failed','Info':'Request body lacks keys: Part'},indent=4),content_type="application/json")
+    if part_id != body['part']:
+        return HttpResponse(json.dumps({'status':'Failed','Info':'Part Id in request body {0} not the same with Part Id in path {1}. plz check again'.format(body['part'],part_id)},indent=4),content_type="application/json")
     drawing=db.drawable
     now=datetime.datetime.now()
     current={}
