@@ -78,7 +78,7 @@ class APObject(models.Model):
     update_on = models.DateTimeField('update_on')
 
     class Meta:
-        db_table='AP'
+        db_table='accesspoint'
 
 
 
@@ -89,7 +89,7 @@ class APObject(models.Model):
             "longitude":self.longitude,
             "latitude":self.latitude,
         }
-        AP=db.AP
+        AP=db.accesspoint
         pre = AP.find_one({'_id': ObjectId(self.pk)})
         if pre == None:
             now = datetime.datetime.now()
@@ -126,14 +126,14 @@ class Bracelet(models.Model):
     #profile=EmbedOverrideMixedField('patientProfile',blank=True)
 
     genderChoice=(
-        (0,u'Male'),
-        (1,u'Female'),
-        (-1,u'Other'),
+        ('F',u'Female'),
+        ('M',u'Male'),
+        ('O',u'Other'),
+        ('',u''),
     )
 
-
     patientName=models.CharField(max_length=20,blank=True)
-    patientGender=models.IntegerField(choices=genderChoice,blank=True)
+    patientGender=models.CharField(choices=genderChoice,blank=True,max_length=1)
     patientRemark=models.TextField(blank=True)
     patientPhone=models.CharField(max_length=20,blank=True)
 
@@ -161,13 +161,9 @@ class Bracelet(models.Model):
             "type":self.type,
             "macAddress":self.macAddress,
             "deviceName":self.deviceName,
-            "data":self.data,
             "status":self.status,
-            "patientName":self.patientName,
-            "patientGender":self.patientGender,
-            "patientRemark":self.patientRemark,
-            "patientPhone":self.patientPhone,
         }
+
         bracelet=db.bracelet
         pre = bracelet.find_one({'_id': ObjectId(self.pk)})#
         #if self.status==0 and (self.patientName!= '' or self.patientGender!='' or self.patientPhone!='' or self.patientRemark1!=''):

@@ -48,8 +48,7 @@ class APObjectAdmin(admin.ModelAdmin):
 
 
 class BraceletAdmin(admin.ModelAdmin):
-    readonly_fields = ['pk_id','create_on','update_by','update_on','patientName','patientGender','patientPhone','patientRemark']
-    #Todo:support to search objectId,paitent profile,device name
+    readonly_fields = ['pk_id','create_on','update_by','update_on','patientName','patientGender','patientPhone','patientRemark','data']
     #search_fields=['macAddress']
     #Todo:add list_filter with status, type,
     list_filter=('status',)
@@ -117,6 +116,7 @@ class BraceletAdmin(admin.ModelAdmin):
             logger.debug('heyheyhey----resultlo-{0}'.format(bracelet_obj_list))
         else:
             bracelet_obj_list = self.model.objects.all()
+            logger.debug('---{0}'.format(bracelet_obj_list))
         for bracelet in bracelet_obj_list:
                 result_list.append(bracelet.pk)
 
