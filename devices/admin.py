@@ -48,13 +48,13 @@ class APObjectAdmin(admin.ModelAdmin):
 
 
 class BraceletAdmin(admin.ModelAdmin):
-    readonly_fields = ['pk_id','create_on','update_by','update_on','patientName','patientGender','patientPhone','patientRemark','data']
+    readonly_fields = ['pk_id','create_on','update_by','update_on','patientName','patientGender','patientPhone','patientRemark','data','patientRoom']
     #search_fields=['macAddress']
     #Todo:add list_filter with status, type,
     list_filter=('status',)
     fieldsets=[
-        ('Main Info',{'fields':['pk_id','deviceName','type','macAddress','data','status']}),
-        ('Patient Details',{'fields':['patientName','patientGender','patientPhone','patientRemark'],'classes':['collapse']}),
+        ('Main Info',{'fields':['pk_id','deviceName','type','macAddress','className','data','status']}),
+        ('Patient Details',{'fields':['patientName','patientGender','patientRoom','patientPhone','patientRemark'],'classes':['collapse']}),
         ('Other Info',{'fields':['create_on','update_on','update_by']}),
     ]
 
