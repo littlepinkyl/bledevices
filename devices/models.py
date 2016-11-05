@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-
+
 from __future__ import unicode_literals
 from bson.objectid import ObjectId
 from django.db import models
@@ -65,21 +67,40 @@ class patientProfile(models.Model):
 class APObject(models.Model):
     pk_id=ObjectIdField(max_length=50,db_column='id',verbose_name='Object ID')
     deviceName=models.CharField(max_length=20,db_column='name',verbose_name='Device name')
+
     APStatus=(
         (0,u'working'),
         (1,u'not working'),
     )
-    status=models.IntegerField(choices=APStatus)
+    status=models.IntegerField(choices=APStatus,help_text='对于working,暂时无法默认显示读取值,保存前需要修改为非空')
+    def isWorking(self):
+        return self.status == 0
+    isWorking.boolean=True
+
+    floor=models.IntegerField(null=True,default=0)
+    address=models.TextField(blank=True)
+
     #gps = EmbedOverrideFloatField('gps')
     longitude=models.FloatField(blank=True)
     latitude=models.FloatField(blank=True)
     create_on = models.DateTimeField('create_on')
-    update_by = ObjectIdField(max_length=50,db_column='update_by',verbose_name='update by')
-    update_on = models.DateTimeField('update_on')
+    update_by = ObjectIdField(max_length=50,db_column='update_by',verbose_name='update by',null=True)
+    update_on = models.DateTimeField('update_on',null=True)
 
     class Meta:
         db_table='accesspoint'
 
+    def showCreateBy(self):
+        if self.update_by =='':
+            return 'None'
+        user=db.auth_user
+        i = user.find_one({'_id':ObjectId(self.update_by)})
+        if i :
+            if i['last_name'] or i['first_name']:
+                return "%s (%s%s)" % (i['username'],i['last_name'],i['first_name'])
+            else:
+                return "%s" % (i['username'],)
+    showCreateBy.short_description='Create By'
 
 
     def save(self):
@@ -88,7 +109,10 @@ class APObject(models.Model):
             "status":self.status,
             "longitude":self.longitude,
             "latitude":self.latitude,
+            "floor":self.floor,
+            "address":self.address
         }
+        logger.debug('[0]--{0}'.format(self.status))
         AP=db.accesspoint
         pre = AP.find_one({'_id': ObjectId(self.pk)})
         if pre == None:
@@ -119,9 +143,10 @@ class Bracelet(models.Model):
     #  )
     # TOdo:serial Id field
     deviceName=models.CharField(max_length=10)
-    type=models.CharField(max_length=2,default='01')
-    macAddress=models.CharField(max_length=17)
-    data=models.CharField(max_length=72,blank=True)
+    type=models.CharField(max_length=2,default='01',blank=True)
+    macAddress=models.CharField(max_length=17,blank=True)
+    data=models.CharField(max_length=60,blank=True)
+    className=models.CharField(max_length=50,blank=True,db_column='_class')
     #patientProfile=
     #profile=EmbedOverrideMixedField('patientProfile',blank=True)
 
@@ -133,9 +158,10 @@ class Bracelet(models.Model):
     )
 
     patientName=models.CharField(max_length=20,blank=True)
-    patientGender=models.CharField(choices=genderChoice,blank=True,max_length=1)
+    patientGender=models.CharField(choices=genderChoice,blank=True,max_length=1,null=True)
     patientRemark=models.TextField(blank=True)
     patientPhone=models.CharField(max_length=20,blank=True)
+    patientRoom=models.CharField(max_length=30,blank=True)
 
     BStatus=(
         (0,u'not registered'),
@@ -143,17 +169,39 @@ class Bracelet(models.Model):
         (2,u'not used any more'),
         (3,u'other')
     )
-    status=models.IntegerField(choices=BStatus,default=0,blank=True)
-    create_on = models.DateTimeField('create_on')
-    update_by = ObjectIdField(max_length=50,db_column='update_by',verbose_name='update by')
-    update_on = models.DateTimeField('update_on')
+    status=models.IntegerField(choices=BStatus,help_text='若未注册,暂时无法默认显示读取值,保存前需要修改为非空')
+    def unregistered(self):
+        return self.status == 0
+    unregistered.boolean=True
+    create_on = models.DateTimeField(db_column='create_on',blank=True,null=True)
+    update_by = ObjectIdField(max_length=50,db_column='update_by',verbose_name='update by',blank=True)
+    update_on = models.DateTimeField(db_column='update_on',blank=True,null=True)
 
     class Meta:
         db_table='bracelet'
     def showPatientProfile(self):
+        gender=''
         if self.patientName != '' and self.patientGender is not None:
-            return "%s/%s/%s" %  (self.patientName,self.genderChoice[self.patientGender][1],self.patientPhone)
+            for i in self.genderChoice:
+                if i[0] == self.patientGender:
+                    gender=i[1]
+                    break
+            if gender =='':
+                gender='invalid value'
+            return "%s/%s/%s" %  (self.patientName,gender,self.patientPhone)
     showPatientProfile.short_description='PatientProfile'
+
+    def showCreateBy(self):
+        if self.update_by =='':
+            return 'None'
+        user=db.auth_user
+        i = user.find_one({'_id':ObjectId(self.update_by)})
+        if i :
+            if i['last_name'] or i['first_name']:
+                return "%s (%s%s)" % (i['username'],i['last_name'],i['first_name'])
+            else:
+                return "%s" % (i['username'],)
+    showCreateBy.short_description='Create By'
 
     def save(self):
         logger.debug('DEBUG:---self.status---{0}'.format(self.status))
@@ -162,6 +210,7 @@ class Bracelet(models.Model):
             "macAddress":self.macAddress,
             "deviceName":self.deviceName,
             "status":self.status,
+            "className":self.className,
         }
 
         bracelet=db.bracelet

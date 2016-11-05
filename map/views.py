@@ -115,3 +115,4 @@ def post_drawing(request,part_id):
     re['part_id']=part_id
 
     return HttpResponse(json.dumps(re, encoding='utf8', indent=4), content_type="application/json")
+
