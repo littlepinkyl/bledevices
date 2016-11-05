@@ -169,7 +169,10 @@ class Bracelet(models.Model):
         (2,u'not used any more'),
         (3,u'other')
     )
-    status=models.IntegerField(choices=BStatus,default=0,blank=True)
+    status=models.IntegerField(choices=BStatus,help_text='若未注册,暂时无法默认显示读取值,保存前需要修改为非空')
+    def unregistered(self):
+        return self.status == 0
+    unregistered.boolean=True
     create_on = models.DateTimeField(db_column='create_on',blank=True,null=True)
     update_by = ObjectIdField(max_length=50,db_column='update_by',verbose_name='update by',blank=True)
     update_on = models.DateTimeField(db_column='update_on',blank=True,null=True)
@@ -187,6 +190,18 @@ class Bracelet(models.Model):
                 gender='invalid value'
             return "%s/%s/%s" %  (self.patientName,gender,self.patientPhone)
     showPatientProfile.short_description='PatientProfile'
+
+    def showCreateBy(self):
+        if self.update_by =='':
+            return 'None'
+        user=db.auth_user
+        i = user.find_one({'_id':ObjectId(self.update_by)})
+        if i :
+            if i['last_name'] or i['first_name']:
+                return "%s (%s%s)" % (i['username'],i['last_name'],i['first_name'])
+            else:
+                return "%s" % (i['username'],)
+    showCreateBy.short_description='Create By'
 
     def save(self):
         logger.debug('DEBUG:---self.status---{0}'.format(self.status))
