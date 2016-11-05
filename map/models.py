@@ -41,6 +41,7 @@ class Organization(models.Model):
     latitude=models.FloatField()
     create_on=models.DateTimeField()
     update_on=models.DateTimeField()
+    create_by=ObjectIdField(max_length=50,blank=True)
     parent=ObjectIdField(blank=True,max_length=50)
 
     #bounds
@@ -65,6 +66,7 @@ class Organization(models.Model):
             now = datetime.datetime.now()
             current['create_on']=now
             current['update_on']=now
+            current['create_by']=self.update_by
             #current['update_by']=self.update_by
             #status
 
@@ -81,7 +83,17 @@ class Organization(models.Model):
             if res == 1:
                 #print '[DEBUG]:save successfully!'
                 pass
-
+    def showCreateBy(self):
+        if self.update_by =='':
+            return 'None'
+        user=db.auth_user
+        i = user.find_one({'_id':ObjectId(self.update_by)})
+        if i :
+            if i['last_name'] or i['first_name']:
+                return "%s (%s%s)" % (i['username'],i['last_name'],i['first_name'])
+            else:
+                return "%s" % (i['username'],)
+    showCreateBy.short_description='Create By'
 
 class Part(models.Model):
     pk_id=ObjectIdField(max_length=50,verbose_name='Part Id',db_column='id')
@@ -89,6 +101,7 @@ class Part(models.Model):
     floor=models.IntegerField(blank=True)
     create_on=models.DateTimeField()
     update_on=models.DateTimeField()
+    create_by=ObjectIdField(max_length=50,blank=True)
     parent=ObjectIdField(blank=True,max_length=50)
     owner=ObjectIdField(blank=True,max_length=50)
 
@@ -111,6 +124,7 @@ class Part(models.Model):
             now = datetime.datetime.now()
             current['create_on']=now
             current['update_on']=now
+            current['create_by']=self.update_by
             #current['update_by']=self.update_by
             #status
 
@@ -127,6 +141,17 @@ class Part(models.Model):
             if res == 1:
                 #print '[DEBUG]:save successfully!'
                 pass
+    def showCreateBy(self):
+        if self.update_by =='':
+            return 'None'
+        user=db.auth_user
+        i = user.find_one({'_id':ObjectId(self.update_by)})
+        if i :
+            if i['last_name'] or i['first_name']:
+                return "%s (%s%s)" % (i['username'],i['last_name'],i['first_name'])
+            else:
+                return "%s" % (i['username'],)
+    showCreateBy.short_description='Create By'
 
 class Drawable(models.Model):
     pk_id=ObjectIdField(max_length=50,verbose_name='Drawable Id',db_column='id')
