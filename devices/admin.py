@@ -19,15 +19,15 @@ from .models import APObject,Bracelet
 #from map.models import Organization
 
 class APObjectAdmin(admin.ModelAdmin):
-    readonly_fields=['pk_id','create_on','update_by','update_on','showMap']
+    readonly_fields=['pk_id','create_on','update_by','update_on','showMap','isWorking','showCreateBy']
 
-    list_display=('pk_id','deviceName','status','create_on')
+    list_display=('pk_id','deviceName','address','isWorking','create_on')
     list_filter=('create_on','status')
-    search_fields=['deviceName']
+    search_fields=['deviceName','address']
     #fields=('pk_id','deviceName','status','gps')
     fieldsets=[
-        ('Main Info',{'fields':['pk_id','deviceName','status','longitude','latitude','showMap']}),
-        ('Other Info',{'fields':['create_on','update_on','update_by']})
+        ('Main Info',{'fields':['pk_id','deviceName','address','floor',('isWorking','status'),'longitude','latitude','showMap']}),
+        ('Other Info',{'fields':['create_on','update_on','showCreateBy']})
     ]
     def formfield_for_dbfield(self, db_field, **kwargs):
         formfield = super(APObjectAdmin, self).formfield_for_dbfield(db_field, **kwargs)
