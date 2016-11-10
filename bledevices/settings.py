@@ -11,7 +11,12 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
-
+#add chartkick
+import chartkick
+STATICFILES_DIRS = (
+    os.path.join(os.path.dirname(__file__), '../static/').replace('\\','/'),
+    chartkick.js(),
+)
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -40,6 +45,7 @@ INSTALLED_APPS = [
     'djangotoolbox',
     'devices',
     'map',
+    'chartkick',
 ]
 
 MIDDLEWARE = [
@@ -124,7 +130,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
-
+STATIC_ROOT= BASE_DIR
 STATIC_URL = '/static/'
 LOGGING = {
     'version': 1,

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% comment %}
+    use highcharts
+    <script src="http://www.google.com/jsapi"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.bundle.min.js"></script>
+    {% endcomment %}
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="../../static/chartkick.js"></script>
+    <title>Title</title>
+</head>
+<body>
+{% load chartkick %}
+{% bar_chart data with style="width:100px; height:20px;" %}
+{% pie_chart data %}
+{% column_chart te %}
+
+
+</body>
+</html>

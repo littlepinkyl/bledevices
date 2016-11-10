@@ -1,8 +1,5 @@
 #-*- coding: utf-8 -*-
 from django.shortcuts import render
-
-# Create your views here.
-from django.shortcuts import render
 #from django.views import View
 import json
 from bson import ObjectId

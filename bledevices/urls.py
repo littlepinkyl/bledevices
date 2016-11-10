@@ -18,5 +18,6 @@ from django.contrib import admin
 admin.autodiscover()
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^map/',include('map.urls'))
+    url(r'^map/',include('map.urls')),
+    url(r'^devices/',include('devices.urls'))
 ]
