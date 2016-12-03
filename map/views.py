@@ -1,8 +1,5 @@
 #-*- coding: utf-8 -*-
 from django.shortcuts import render
-
-# Create your views here.
-from django.shortcuts import render
 #from django.views import View
 import json
 from bson import ObjectId
@@ -96,7 +93,6 @@ def post_drawing(request,part_id):
     for i in body['drawing']:
         try:
             current=i
-
             current['create_on']=now
             current['update_on']=now
             current['part']=ObjectId(body['part'])
@@ -107,6 +103,8 @@ def post_drawing(request,part_id):
             else:
                 #
                 logger.debug('[ERROR]-----cannot insert :{0}---{1}'.format(current['title'],current))
+                if not re.has_key('ERROR'):
+                    re['ERROR'] = []
                 re['ERROR'].append(current['title'])
         except Exception,e:
             re['obj_id'].append({'pre_id': pre_id.__str__(), "title": current['title'],"exception":'[{0}]'.format(e)})
