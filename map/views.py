@@ -34,7 +34,7 @@ def get_org(request,org_id=''):
     else:
         #check if objectid valid
         if not ObjectId.is_valid (org_id) :
-            return HttpResponse(json.dumps({'status':'Failed','Info':'Wrong para.Plz check whether it\'s valid Id'},indent=4),content_type="application/json")
+            return addCORSHeaders(HttpResponse(json.dumps({'status':'Failed','Info':'Wrong para.Plz check whether it\'s valid Id'},indent=4),content_type="application/json"))
         else:
             showValuePart = ['title', 'floor', 'floors']
             showValuePartDict = {}
@@ -61,15 +61,15 @@ def get_org(request,org_id=''):
     result['status']='ok'
     result['data']=data
 
-    return HttpResponse(json.dumps(result,encoding='utf8',indent=4), content_type="application/json")
+    return addCORSHeaders(HttpResponse(json.dumps(result,encoding='utf8',indent=4), content_type="application/json"))
 
 @csrf_exempt
 def post_drawing(request,part_id):
     #part_id invalid, part_id not exist
     if not ObjectId.is_valid(part_id):
-        return HttpResponse(json.dumps({'status':'Failed','Info':'Wrong para.Plz check whether it\'s valid Id'},indent=4),content_type="application/json")
+        return addCORSHeaders(HttpResponse(json.dumps({'status':'Failed','Info':'Wrong para.Plz check whether it\'s valid Id'},indent=4),content_type="application/json"))
     if db.part.find({'_id':ObjectId(part_id)}).count() == 0:
-        return HttpResponse(json.dumps({'status':'Failed','Info':'Part Id {0} not exists. plz check again'.format(part_id)},indent=4),content_type="application/json")
+        return addCORSHeaders(HttpResponse(json.dumps({'status':'Failed','Info':'Part Id {0} not exists. plz check again'.format(part_id)},indent=4),content_type="application/json"))
 
     body={}
     re={}
@@ -79,12 +79,12 @@ def post_drawing(request,part_id):
 
     except Exception,e:
         logger.debug('[1]---{0}---{1}---{2}'.format(Exception,e,request.body))
-        return HttpResponse(json.dumps({'status':'Failed','Info':'Request body is not valid json. plz check again','Data':request.body},indent=4),content_type="application/json")
+        return addCORSHeaders(HttpResponse(json.dumps({'status':'Failed','Info':'Request body is not valid json. plz check again','Data':request.body},indent=4),content_type="application/json"))
 
     if 'part' not in body.keys() :
-        return HttpResponse(json.dumps({'status':'Failed','Info':'Request body lacks keys: Part'},indent=4),content_type="application/json")
+        return addCORSHeaders(HttpResponse(json.dumps({'status':'Failed','Info':'Request body lacks keys: Part'},indent=4),content_type="application/json"))
     if part_id != body['part']:
-        return HttpResponse(json.dumps({'status':'Failed','Info':'Part Id in request body {0} not the same with Part Id in path {1}. plz check again'.format(body['part'],part_id)},indent=4),content_type="application/json")
+        return addCORSHeaders(HttpResponse(json.dumps({'status':'Failed','Info':'Part Id in request body {0} not the same with Part Id in path {1}. plz check again'.format(body['part'],part_id)},indent=4),content_type="application/json"))
     drawing=db.drawable
     now=datetime.datetime.now()
     current={}
@@ -112,5 +112,13 @@ def post_drawing(request,part_id):
     re['status']='ok'
     re['part_id']=part_id
 
-    return HttpResponse(json.dumps(re, encoding='utf8', indent=4), content_type="application/json")
+    return addCORSHeaders(HttpResponse(json.dumps(re, encoding='utf8', indent=4), content_type="application/json"))
+
+def addCORSHeaders(http_response):
+    http_response['Access-Control-Allow-Origin'] = '*'
+    http_response['Access-Control-Max-Age'] = '120'
+    http_response['Access-Control-Allow-Credentials'] = 'true'
+    http_response['Access-Control-Allow-Methods'] = 'OPTIONS, GET, POST, DELETE'
+    http_response['Access-Control-Allow-Headers'] = 'origin, content-type, accept, x-requested-with'
+    return http_response
 

@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 import json
 from bson import ObjectId
+from bson import json_util
 from pymongo import MongoClient
 from django.conf import settings
 from django.http import HttpResponse
@@ -30,8 +31,8 @@ def ap(request):
 
         result['status'] = 'ok'
         result['data'] = data
-        return HttpResponse(json.dumps(result,encoding='utf8',indent=4), content_type="application/json")
-    elif request.method == 'PUT' :
+        return addCORSHeaders(HttpResponse(json.dumps(result,encoding='utf8',indent=4), content_type="application/json"))
+    elif request.method == 'POST' :
         try:
             body_data_list = json.loads(request.body)
 
@@ -43,9 +44,9 @@ def ap(request):
         except Exception, e:
             #logger.debug('[1]---{0}---{1}---{2}'.format(Exception, e, request.body))
             print
-            return HttpResponse(json.dumps(
+            return addCORSHeaders(HttpResponse(json.dumps(
                 {'status': 'Failed', 'Info': '%s-%s' % (Exception,e), 'Data': request.body},
-                indent=4), content_type="application/json")
+                indent=4), content_type="application/json"))
 
         ap = db.accesspoint
         now = datetime.datetime.now()
@@ -56,7 +57,8 @@ def ap(request):
                 current = i
                 current['update_by'] = 'API'
                 current['update_on'] = now
-                res = ap.update({'_id': ObjectId(current['id'])},{'$set': current})
+                current['status'] = 1
+                res = ap.update_one({'_id': ObjectId(current['id'])},{'$set': current})
                 if res['ok'] != 1 or res['nModified']!=1 :
                     logger.debug('[ERROR]-----cannot insert :{0}---{1}---{2}'.format(res,current['id'], current))
                     if not result.has_key('ERROR'):
@@ -67,8 +69,15 @@ def ap(request):
                 if not result.has_key('ERROR'):
                     result['ERROR'] = []
                 result['ERROR'].append(
-                    {'id': current['id'], "content": json.dumps(current), "exception": '[{0}]'.format(e)})
+                    {'id': current['id'], "content": json.dumps(current,default=json_util.default), "exception": '[{0}]'.format(e)})
         result['status'] = 'ok'
-        return HttpResponse(json.dumps(result,encoding='utf8', indent=4), content_type="application/json")
+        return addCORSHeaders(HttpResponse(json.dumps(result,encoding='utf8', indent=4), content_type="application/json"))
 
+def addCORSHeaders(http_response):
+    http_response['Access-Control-Allow-Origin'] = '*'
+    http_response['Access-Control-Max-Age'] = '120'
+    http_response['Access-Control-Allow-Credentials'] = 'true'
+    http_response['Access-Control-Allow-Methods'] = 'OPTIONS, GET, POST, DELETE'
+    http_response['Access-Control-Allow-Headers'] = 'origin, content-type, accept, x-requested-with'
+    return http_response
 
