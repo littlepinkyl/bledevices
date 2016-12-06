@@ -81,9 +81,9 @@ class APObject(models.Model):
     address=models.TextField(blank=True)
 
     #gps = EmbedOverrideFloatField('gps')
-    longitude=models.FloatField(blank=True)
-    latitude=models.FloatField(blank=True)
-    height = models.FloatField(blank=True)
+    longitude=models.FloatField(blank=True,null=True)
+    latitude=models.FloatField(blank=True,null=True)
+    height = models.FloatField(blank=True,null=True)
     create_on = models.DateTimeField('create_on')
     update_by = ObjectIdField(max_length=50,db_column='update_by',verbose_name='update by',null=True)
     update_on = models.DateTimeField('update_on',null=True)

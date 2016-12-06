@@ -59,7 +59,9 @@ def ap(request):
                 current['update_on'] = now
                 current['status'] = 1
                 res = ap.update_one({'_id': ObjectId(current['id'])},{'$set': current})
-                if res['ok'] != 1 or res['nModified']!=1 :
+                #print '---{0}'.format(type(res))
+                #print "here",res.raw_result,res.upserted_id
+                if res.raw_result['ok'] != 1 or res.raw_result['nModified']!=1 :
                     logger.debug('[ERROR]-----cannot insert :{0}---{1}---{2}'.format(res,current['id'], current))
                     if not result.has_key('ERROR'):
                         result['ERROR'] = []
@@ -70,7 +72,10 @@ def ap(request):
                     result['ERROR'] = []
                 result['ERROR'].append(
                     {'id': current['id'], "content": json.dumps(current,default=json_util.default), "exception": '[{0}]'.format(e)})
-        result['status'] = 'ok'
+        if not result.has_key('ERROR'):
+            result['status'] = 'ok'
+        else:
+            result['status']='fail'
         return addCORSHeaders(HttpResponse(json.dumps(result,encoding='utf8', indent=4), content_type="application/json"))
 
 def addCORSHeaders(http_response):
