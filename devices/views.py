@@ -51,11 +51,11 @@ def ap(request):
         ap = db.accesspoint
         now = datetime.datetime.now()
         current = {}
-
+        user = db.auth_user.find_one({'username':'API'})
         for i in body_data_list:
             try:
                 current = i
-                current['update_by'] = 'API'
+                current['update_by'] = user['_id']
                 current['update_on'] = now
                 current['status'] = 1
                 res = ap.update_one({'_id': ObjectId(current['id'])},{'$set': current})
