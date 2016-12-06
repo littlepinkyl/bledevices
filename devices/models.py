@@ -91,7 +91,7 @@ class APObject(models.Model):
     class Meta:
         db_table='accesspoint'
 
-    def showCreateBy(self):
+    def showUpdateBy(self):
         if self.update_by =='':
             return 'None'
         user=db.auth_user
@@ -101,7 +101,7 @@ class APObject(models.Model):
                 return "%s (%s%s)" % (i['username'],i['last_name'],i['first_name'])
             else:
                 return "%s" % (i['username'],)
-    showCreateBy.short_description='Create By'
+    showUpdateBy.short_description='Update By'
 
 
     def save(self):
