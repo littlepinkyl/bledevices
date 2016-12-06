@@ -58,7 +58,8 @@ def ap(request):
                 current['update_by'] = 'API'
                 current['update_on'] = now
                 current['status'] = 1
-                res = ap.update_one({'_id': ObjectId(current['id'])},{'$set': current})
+                res = ap.update({'_id': ObjectId(current['id'])},{'$set': current})
+                print '---{0}'.format(type(res))
                 if res['ok'] != 1 or res['nModified']!=1 :
                     logger.debug('[ERROR]-----cannot insert :{0}---{1}---{2}'.format(res,current['id'], current))
                     if not result.has_key('ERROR'):
