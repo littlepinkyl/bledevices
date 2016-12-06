@@ -69,12 +69,12 @@ class APObject(models.Model):
     deviceName=models.CharField(max_length=20,db_column='name',verbose_name='Device name')
 
     APStatus=(
-        (0,u'working'),
-        (1,u'not working'),
+        (1,u'working'),
+        (0,u'not working'),
     )
-    status=models.IntegerField(choices=APStatus,help_text='对于working,暂时无法默认显示读取值,保存前需要修改为非空')
+    status=models.IntegerField(choices=APStatus,help_text='对于not working,暂时无法默认显示读取值,保存前需要修改为非空')
     def isWorking(self):
-        return self.status == 0
+        return self.status == 1
     isWorking.boolean=True
 
     floor=models.IntegerField(null=True,default=0)
